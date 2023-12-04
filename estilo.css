@@ -13,10 +13,18 @@
 	box-shadow: 1px 3px 5px black;
 }
 
-#titulo {
-
-	text-transform: uppercase;
+#logo a {
+	
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	z-index: 3;
+	background: url(E-HELP1.png) no-repeat;
+	width: 151px;
+	height: 66px;
+	text-indent: -9000px;
 }
+
 #titulo, #menu {
 
 	padding: 10px;
@@ -91,6 +99,40 @@ button:hover {
 .float {
 
 	margin-bottom: 20px;
+}
+
+.grid-noticias {
+
+	display: grid;
+ 	grid-template-columns: auto auto;
+	justify-content: space-around;
+	padding-bottom: 30px;
+
+}
+
+#noticia-lugar {
+
+	border-radius: 10px;
+	border: 2px solid black;
+	width: 400px;
+	padding: 20px;
+	text-align: center;
+
+}
+
+#noticia-turismo {
+
+	border-radius: 10px;
+	border: 2px solid black;
+	width: 400px;
+	padding: 20px;
+	text-align: center;
+
+}
+
+.formatacao-img-noticia {
+
+	padding: 10px;
 }
 
 #rodape {
