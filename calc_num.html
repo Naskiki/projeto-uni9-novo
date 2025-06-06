@@ -76,17 +76,22 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    function obterTimestamp() {
+    let ultimoResultado = null;
+    let ultimoOperador = null;
+    let ultimoNum1 = null;
+    let ultimoNum2 = null;
+
+    function horaAtual() {
       const agora = new Date();
-      // Retorna apenas hora e minuto, formato HH:MM
-      return agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const h = agora.getHours().toString().padStart(2, '0');
+      const m = agora.getMinutes().toString().padStart(2, '0');
+      return `${h}:${m}`;
     }
 
     function logar(mensagem, tipo = 'info') {
       const painel = document.getElementById('painel-log');
       const linha = document.createElement('div');
-      const timestamp = obterTimestamp();
-      linha.textContent = `[${timestamp}] [${tipo.toUpperCase()}] ${mensagem}`;
+      linha.textContent = `[${horaAtual()}] [${tipo.toUpperCase()}] ${mensagem}`;
       linha.classList.add('mb-1');
       if (tipo === 'erro') linha.classList.add('text-danger');
       if (tipo === 'aviso') linha.classList.add('text-warning');
@@ -105,6 +110,10 @@
         const msg = 'Por favor, insira dois números válidos.';
         document.getElementById('resultado').innerText = msg;
         logar(msg, 'erro');
+        ultimoResultado = null;
+        ultimoOperador = null;
+        ultimoNum1 = null;
+        ultimoNum2 = null;
         return;
       }
 
@@ -136,45 +145,58 @@
       }
 
       document.getElementById('resultado').innerText = `Resultado: ${resultado}`;
+
+      // Salva os últimos valores para os testes
+      ultimoResultado = resultado;
+      ultimoOperador = operador;
+      ultimoNum1 = num1;
+      ultimoNum2 = num2;
     }
 
     function rodarTestesTecnicos() {
       logar('--- Iniciando testes técnicos ---', 'aviso');
 
-      const testes = [
-        { descricao: 'Soma simples', a: 2, b: 3, op: '+', esperado: 5 },
-        { descricao: 'Subtração simples', a: 10, b: 4, op: '-', esperado: 6 },
-        { descricao: 'Multiplicação simples', a: 7, b: 8, op: '*', esperado: 56 },
-        { descricao: 'Divisão simples', a: 20, b: 4, op: '/', esperado: 5 },
-        { descricao: 'Divisão por zero', a: 10, b: 0, op: '/', esperado: 'Erro' },
-        { descricao: 'Números negativos', a: -5, b: -3, op: '+', esperado: -8 },
-        { descricao: 'Números decimais', a: 2.5, b: 1.5, op: '+', esperado: 4.0 },
-      ];
+      if (
+        ultimoResultado === null ||
+        ultimoOperador === null ||
+        ultimoNum1 === null ||
+        ultimoNum2 === null
+      ) {
+        logar('Nenhuma operação realizada pelo usuário para testar.', 'erro');
+        logar('--- Fim dos testes técnicos ---', 'aviso');
+        return;
+      }
 
-      testes.forEach((teste, index) => {
-        logar(`Teste ${index + 1}: ${teste.descricao}`);
-        let resultado;
-        try {
-          switch (teste.op) {
-            case '+': resultado = teste.a + teste.b; break;
-            case '-': resultado = teste.a - teste.b; break;
-            case '*': resultado = teste.a * teste.b; break;
-            case '/': resultado = (teste.b === 0) ? 'Erro' : teste.a / teste.b; break;
-            default: resultado = 'Erro';
-          }
+      // Executa novamente a operação do usuário para comparar
+      let esperado;
+      switch (ultimoOperador) {
+        case '+':
+          esperado = ultimoNum1 + ultimoNum2;
+          break;
+        case '-':
+          esperado = ultimoNum1 - ultimoNum2;
+          break;
+        case '*':
+          esperado = ultimoNum1 * ultimoNum2;
+          break;
+        case '/':
+          esperado = (ultimoNum2 === 0) ? 'Erro: divisão por zero!' : ultimoNum1 / ultimoNum2;
+          break;
+        default:
+          esperado = 'Operador inválido';
+      }
 
-          let passou = false;
-          if (typeof teste.esperado === 'string' && resultado === 'Erro') {
-            passou = true;
-          } else if (typeof resultado === 'number' && typeof teste.esperado === 'number') {
-            passou = Math.abs(resultado - teste.esperado) < 1e-9;
-          }
+      let passou = false;
+      if (typeof esperado === 'string') {
+        passou = esperado === ultimoResultado;
+      } else if (typeof esperado === 'number' && typeof ultimoResultado === 'number') {
+        passou = Math.abs(esperado - ultimoResultado) < 1e-9;
+      }
 
-          logar(`Resultado: ${resultado}, Esperado: ${teste.esperado}, Status: ${passou ? 'OK' : 'ERRO'}`, passou ? 'info' : 'erro');
-        } catch (e) {
-          logar(`Erro inesperado: ${e.message}`, 'erro');
-        }
-      });
+      logar(
+        `Teste da última operação: ${ultimoNum1} ${ultimoOperador} ${ultimoNum2} = ${ultimoResultado} | Esperado: ${esperado} | Status: ${passou ? 'OK' : 'ERRO'}`,
+        passou ? 'info' : 'erro'
+      );
 
       logar('--- Fim dos testes técnicos ---', 'aviso');
     }
